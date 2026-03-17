@@ -3,176 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Mudikhana - Admin & Customer</title>
+    <title>স্মার্ট মুদিখানা | Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; background-color: #0F172A; color: #F8FAFC; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .side-menu { transition: 0.3s transform ease-in-out; transform: translateX(-100%); }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
+        .side-menu { transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(-100%); }
         .side-menu.active { transform: translateX(0); }
+        .neon-text { color: #10B981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
     </style>
 </head>
-<body>
+<body class="min-h-screen">
 
-    <nav class="p-4 glass sticky top-0 z-50 flex justify-between items-center shadow-xl">
+    <nav class="p-4 glass sticky top-0 z-50 flex justify-between items-center shadow-2xl">
         <div class="flex items-center gap-3">
-            <button onclick="toggleMenu()" class="p-2 bg-slate-800 rounded-lg text-emerald-500">☰</button>
-            <h1 class="font-bold text-xl text-emerald-500">স্মার্ট দোকান</h1>
+            <button onclick="toggleMenu()" class="p-2 bg-slate-800 rounded-xl text-emerald-500 hover:scale-110 transition">☰</button>
+            <h1 class="font-bold text-xl neon-text">স্মার্ট দোকান</h1>
         </div>
-        <div id="userProfile" class="flex items-center gap-2">
-            <button onclick="googleLogin()" id="loginBtn" class="bg-emerald-600 px-4 py-1.5 rounded-xl text-sm font-bold">লগইন</button>
+        <div id="authArea">
+            <button onclick="login()" id="loginBtn" class="bg-emerald-600 hover:bg-emerald-500 px-5 py-2 rounded-2xl text-sm font-bold shadow-lg transition-all">লগইন করুন</button>
         </div>
     </nav>
 
     <div id="sideMenu" class="fixed inset-y-0 left-0 w-72 glass z-[60] side-menu p-6 shadow-2xl">
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-xl font-bold text-emerald-500">মেনু অপশন</h2>
-            <button onclick="toggleMenu()" class="text-slate-400 text-2xl">×</button>
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-2xl font-bold text-emerald-500">মেনু</h2>
+            <button onclick="toggleMenu()" class="text-slate-400 text-3xl">×</button>
         </div>
         <nav class="space-y-4">
-            <a href="#" onclick="showSection('home')" class="block p-3 hover:bg-emerald-500/10 rounded-xl transition">🏠 হোম ড্যাশবোর্ড</a>
-            <a href="#" onclick="showSection('priceList')" class="block p-3 hover:bg-emerald-500/10 rounded-xl transition">📋 সব পণ্যের তালিকা</a>
-            <div id="adminLinks" class="hidden pt-4 border-t border-slate-700">
-                <p class="text-[10px] text-slate-500 uppercase mb-2 ml-3">অ্যাডমিন প্যানেল</p>
-                <a href="#" onclick="showSection('addProduct')" class="block p-3 hover:bg-orange-500/10 text-orange-400 rounded-xl transition">➕ নতুন পণ্য যোগ</a>
-                <a href="#" onclick="showSection('reports')" class="block p-3 hover:bg-orange-500/10 text-orange-400 rounded-xl transition">📊 বিক্রির রিপোর্ট</a>
+            <button onclick="showSection('home')" class="w-full text-left p-4 hover:bg-emerald-500/10 rounded-2xl transition">🏠 ক্যালকুলেটর</button>
+            <button onclick="showSection('list')" class="w-full text-left p-4 hover:bg-emerald-500/10 rounded-2xl transition">📋 পণ্যের দাম (List)</button>
+            <div id="adminPanel" class="hidden pt-6 border-t border-slate-700">
+                <p class="text-[11px] text-slate-500 uppercase tracking-widest mb-3 ml-2">অ্যাডমিন কন্ট্রোল</p>
+                <button onclick="showSection('add')" class="w-full text-left p-4 text-orange-400 hover:bg-orange-500/10 rounded-2xl transition">➕ নতুন পণ্য যোগ</button>
+                <button onclick="logout()" class="w-full text-left p-4 text-red-400 hover:bg-red-500/10 rounded-2xl transition">🔒 লগআউট</button>
             </div>
         </nav>
     </div>
 
-    <main class="max-w-md mx-auto p-4 mt-4">
-
-        <section id="homeSection" class="space-y-6">
-            <div class="glass p-5 rounded-3xl">
-                <input type="text" id="searchInput" placeholder="পণ্যের নাম লিখে সার্চ..." class="w-full bg-slate-900 border border-slate-700 rounded-2xl py-3 px-5 outline-none focus:ring-2 focus:ring-emerald-500">
+    <main class="max-w-md mx-auto p-4 pt-6">
+        
+        <div id="homeSec" class="space-y-6">
+            <div class="glass p-5 rounded-[2rem] shadow-inner">
+                <input type="text" id="searchInput" placeholder="পণ্যের নাম লিখুন..." class="w-full bg-slate-900 border border-slate-700 rounded-2xl py-4 px-6 outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-lg">
             </div>
-            
-            <div id="calcBox" class="glass p-6 rounded-[2.5rem] hidden animate-in fade-in duration-300">
-                <h2 id="targetName" class="text-2xl font-bold">পণ্য</h2>
-                <p class="text-emerald-400 mb-4">৳ <span id="targetPrice">0</span> / কেজি</p>
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <input type="number" id="qtyInput" placeholder="পরিমাণ" class="bg-slate-900 p-3 rounded-xl text-emerald-400 font-bold text-xl">
-                    <select id="unitType" class="bg-slate-900 p-3 rounded-xl">
-                        <option value="gm">গ্রাম</option>
-                        <option value="kg">কেজি</option>
-                    </select>
+
+            <div id="calcCard" class="glass p-8 rounded-[2.5rem] hidden shadow-2xl border-emerald-500/20">
+                <h2 id="dispName" class="text-3xl font-bold mb-1">পণ্য</h2>
+                <p class="text-emerald-400 text-sm font-semibold mb-6">৳ <span id="dispPrice">0</span> / কেজি</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="text-[10px] text-slate-500 uppercase ml-2">পরিমাণ</label>
+                        <input type="number" id="qty" class="w-full bg-slate-900 p-4 rounded-2xl text-2xl font-bold text-emerald-400 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="0">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-500 uppercase ml-2">ইউনিট</label>
+                        <select id="unit" class="w-full bg-slate-900 p-4 rounded-2xl h-[62px] outline-none">
+                            <option value="gm">গ্রাম (gm)</option>
+                            <option value="kg">কেজি (kg)</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="bg-slate-900/80 p-5 rounded-2xl mb-4 text-center">
-                    <span class="text-slate-400">মোট বিল: </span>
-                    <span class="text-2xl font-black">৳ <span id="finalBill">0.00</span></span>
+
+                <div class="bg-slate-900/80 p-6 rounded-3xl border border-slate-800 mb-6">
+                    <p class="text-slate-500 text-xs text-center mb-1 uppercase">মোট দাম</p>
+                    <p class="text-4xl font-black text-center text-white">৳ <span id="total">0.00</span></p>
                 </div>
-                <button onclick="saveSale()" class="w-full bg-emerald-600 py-3 rounded-xl font-bold shadow-lg">বিক্রি সেভ করুন</button>
+                <button onclick="copyMemo()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-emerald-900/20 active:scale-95 transition">মেমো কপি করুন</button>
             </div>
-        </section>
+        </div>
 
-        <section id="listSection" class="hidden space-y-4">
-            <h2 class="text-center text-xl font-bold mb-4">আজকের বাজার দর (প্রতি কেজি)</h2>
-            <div id="fullPriceList" class="space-y-3">
-                </div>
-        </section>
+        <div id="listSec" class="hidden space-y-4">
+            <h2 class="text-2xl font-bold text-center mb-6">আজকের বাজার দর</h2>
+            <div id="itemsContainer" class="space-y-3"></div>
+        </div>
 
+        <div id="addSec" class="hidden glass p-8 rounded-[2.5rem]">
+            <h2 class="text-xl font-bold mb-6 text-orange-400">নতুন পণ্য যোগ করুন</h2>
+            <div class="space-y-4">
+                <input type="text" id="newName" placeholder="পণ্যের নাম (বাংলায়)" class="w-full bg-slate-900 p-4 rounded-2xl outline-none">
+                <input type="number" id="newPrice" placeholder="প্রতি কেজি দর (৳)" class="w-full bg-slate-900 p-4 rounded-2xl outline-none">
+                <button onclick="addNewProduct()" class="w-full bg-orange-500 py-4 rounded-2xl font-bold shadow-lg">ডাটাবেসে সেভ করুন</button>
+            </div>
+        </div>
     </main>
 
     <script>
-        // --- Firebase Configuration (আপনার নিজেরটা এখানে বসাবেন) ---
+        // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyDV8z9HMAwoLRb5OVu2G1rQnRmS1f-QFwI",
+            authDomain: "my-modern-store-f7cd8.firebaseapp.com",
+            projectId: "my-modern-store-f7cd8",
+            storageBucket: "my-modern-store-f7cd8.firebasestorage.app",
+            messagingSenderId: "959347442093",
+            appId: "1:959347442093:web:fb89c34bc8db0c9d5e2124",
+            measurementId: "G-WYSVGQBBYG"
         };
-        // Firebase ইনিশিয়ালাইজ (যদি কনফিগ থাকে তবেই নিচের লাইন কাজ করবে)
-        // firebase.initializeApp(firebaseConfig);
 
-        let currentUser = null;
-        let adminEmail = "shuvo@gmail.com"; // এখানে আপনার আসল জিমেইল দিন
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const adminEmail = "marufhos3n@gmail.com";
 
-        // UI Logic
-        function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); }
+        let allProducts = [];
 
-        function showSection(name) {
-            document.getElementById('homeSection').classList.add('hidden');
-            document.getElementById('listSection').classList.add('hidden');
-            if(name === 'home') document.getElementById('homeSection').classList.remove('hidden');
-            if(name === 'priceList') {
-                document.getElementById('listSection').classList.remove('hidden');
-                renderList();
-            }
-            toggleMenu();
-        }
-
-        // Login Logic
-        function googleLogin() {
-            // আসল জিমেইল লগইন এর জন্য নিচের কোড লাগবে:
-            /*
-            const provider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithPopup(provider).then((result) => {
-                checkUser(result.user);
-            });
-            */
-            // ডেমো হিসেবে কাজ দেখানোর জন্য:
-            let email = prompt("টেস্টের জন্য জিমেইল দিন:");
-            if(email) checkUser({email: email, displayName: "User"});
-        }
-
-        function checkUser(user) {
-            currentUser = user;
-            document.getElementById('loginBtn').innerText = user.displayName;
-            if(user.email === adminEmail) {
-                document.getElementById('adminLinks').classList.remove('hidden');
-                alert("স্বাগতম অ্যাডমিন!");
+        // Auth Observer
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('authArea').innerHTML = `<img src="${user.photoURL}" class="w-10 h-10 rounded-full border-2 border-emerald-500">`;
+                if(user.email === adminEmail) {
+                    document.getElementById('adminPanel').classList.remove('hidden');
+                }
             } else {
-                alert("আপনি কাস্টমার হিসেবে লগইন করেছেন।");
+                document.getElementById('authArea').innerHTML = `<button onclick="login()" class="bg-emerald-600 px-5 py-2 rounded-2xl text-sm font-bold">লগইন</button>`;
+            }
+            fetchProducts();
+        });
+
+        async function login() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            await auth.signInWithPopup(provider);
+        }
+
+        function logout() { auth.signOut(); window.location.reload(); }
+
+        // Fetch Data from Firestore
+        async function fetchProducts() {
+            const snapshot = await db.collection('products').get();
+            allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderPriceList();
+        }
+
+        async function addNewProduct() {
+            const name = document.getElementById('newName').value;
+            const price = parseFloat(document.getElementById('newPrice').value);
+            if(name && price) {
+                await db.collection('products').add({ name, price });
+                alert("সফলভাবে যোগ হয়েছে!");
+                document.getElementById('newName').value = '';
+                document.getElementById('newPrice').value = '';
+                fetchProducts();
             }
         }
 
-        // Inventory Data (LocalStorage for now)
-        let items = JSON.parse(localStorage.getItem('storeData')) || [
-            { bnName: "মসুর ডাল", price: 140 },
-            { bnName: "চিনি", price: 130 }
-        ];
+        // Calculation & Search
+        document.getElementById('searchInput').addEventListener('input', e => {
+            const found = allProducts.find(p => p.name.includes(e.target.value));
+            if(found && e.target.value !== "") {
+                document.getElementById('calcCard').classList.remove('hidden');
+                document.getElementById('dispName').innerText = found.name;
+                document.getElementById('dispPrice').innerText = found.price;
+                doCalc();
+            } else {
+                document.getElementById('calcCard').classList.add('hidden');
+            }
+        });
 
-        function renderList() {
-            const listDiv = document.getElementById('fullPriceList');
-            listDiv.innerHTML = items.map(i => `
-                <div class="glass p-4 rounded-2xl flex justify-between items-center">
-                    <span class="font-bold">${i.bnName}</span>
-                    <span class="text-emerald-400 font-bold">৳ ${i.price}</span>
+        function doCalc() {
+            const p = parseFloat(document.getElementById('dispPrice').innerText);
+            const q = parseFloat(document.getElementById('qty').value) || 0;
+            const u = document.getElementById('unit').value;
+            const res = (u === 'gm') ? (p/1000)*q : p*q;
+            document.getElementById('total').innerText = res.toFixed(2);
+        }
+
+        document.getElementById('qty').oninput = doCalc;
+        document.getElementById('unit').onchange = doCalc;
+
+        function renderPriceList() {
+            const container = document.getElementById('itemsContainer');
+            container.innerHTML = allProducts.map(p => `
+                <div class="glass p-5 rounded-2xl flex justify-between items-center">
+                    <span class="font-bold text-lg">${p.name}</span>
+                    <span class="text-emerald-400 font-black">৳ ${p.price}</span>
                 </div>
             `).join('');
         }
 
-        // Search & Calculation
-        const search = document.getElementById('searchInput');
-        search.addEventListener('input', (e) => {
-            const prod = items.find(i => i.bnName.includes(e.target.value));
-            if(prod && e.target.value !== "") {
-                document.getElementById('calcBox').classList.remove('hidden');
-                document.getElementById('targetName').innerText = prod.bnName;
-                document.getElementById('targetPrice').innerText = prod.price;
-                calculate();
-            }
-        });
+        function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); }
 
-        function calculate() {
-            let p = parseFloat(document.getElementById('targetPrice').innerText);
-            let q = parseFloat(document.getElementById('qtyInput').value) || 0;
-            let u = document.getElementById('unitType').value;
-            let total = (u === 'gm') ? (p/1000)*q : p*q;
-            document.getElementById('finalBill').innerText = total.toFixed(2);
+        function showSection(sec) {
+            ['homeSec', 'listSec', 'addSec'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            if(sec === 'home') document.getElementById('homeSec').classList.remove('hidden');
+            if(sec === 'list') document.getElementById('listSec').classList.remove('hidden');
+            if(sec === 'add') document.getElementById('addSec').classList.remove('hidden');
+            toggleMenu();
         }
 
-        document.getElementById('qtyInput').oninput = calculate;
-        document.getElementById('unitType').onchange = calculate;
-
+        function copyMemo() {
+            const text = `--- স্মার্ট দোকান ---\nপণ্য: ${document.getElementById('dispName').innerText}\nপরিমাণ: ${document.getElementById('qty').value} ${document.getElementById('unit').value}\nমোট দাম: ৳ ${document.getElementById('total').innerText}`;
+            navigator.clipboard.writeText(text);
+            alert("মেমো কপি হয়েছে!");
+        }
     </script>
 </body>
-</html>
+    </html>
+    
