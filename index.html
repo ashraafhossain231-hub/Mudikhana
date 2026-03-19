@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>স্মার্ট মুদিখানা | Admin Dashboard</title>
+    <title>ভাই ভাই স্টোর - স্মার্ট ড্যাশবোর্ড</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&display=swap" rel="stylesheet">
     
@@ -14,90 +14,80 @@
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; background-color: #0F172A; color: #F8FAFC; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
-        .side-menu { transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(-100%); }
-        .side-menu.active { transform: translateX(0); }
-        .neon-text { color: #10B981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+        .neon-border { border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: 0 0 15px rgba(16, 185, 129, 0.1); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="pb-20">
 
     <nav class="p-4 glass sticky top-0 z-50 flex justify-between items-center shadow-2xl">
-        <div class="flex items-center gap-3">
-            <button onclick="toggleMenu()" class="p-2 bg-slate-800 rounded-xl text-emerald-500 hover:scale-110 transition">☰</button>
-            <h1 class="font-bold text-xl neon-text">স্মার্ট দোকান</h1>
-        </div>
+        <h1 class="font-bold text-xl text-emerald-500">ভাই ভাই স্টোর</h1>
         <div id="authArea">
-            <button onclick="login()" id="loginBtn" class="bg-emerald-600 hover:bg-emerald-500 px-5 py-2 rounded-2xl text-sm font-bold shadow-lg transition-all">লগইন করুন</button>
+            <button onclick="login()" id="loginBtn" class="bg-emerald-600 px-4 py-1.5 rounded-xl text-sm font-bold">লগইন</button>
         </div>
     </nav>
 
-    <div id="sideMenu" class="fixed inset-y-0 left-0 w-72 glass z-[60] side-menu p-6 shadow-2xl">
-        <div class="flex justify-between items-center mb-10">
-            <h2 class="text-2xl font-bold text-emerald-500">মেনু</h2>
-            <button onclick="toggleMenu()" class="text-slate-400 text-3xl">×</button>
-        </div>
-        <nav class="space-y-4">
-            <button onclick="showSection('home')" class="w-full text-left p-4 hover:bg-emerald-500/10 rounded-2xl transition">🏠 ক্যালকুলেটর</button>
-            <button onclick="showSection('list')" class="w-full text-left p-4 hover:bg-emerald-500/10 rounded-2xl transition">📋 পণ্যের দাম (List)</button>
-            <div id="adminPanel" class="hidden pt-6 border-t border-slate-700">
-                <p class="text-[11px] text-slate-500 uppercase tracking-widest mb-3 ml-2">অ্যাডমিন কন্ট্রোল</p>
-                <button onclick="showSection('add')" class="w-full text-left p-4 text-orange-400 hover:bg-orange-500/10 rounded-2xl transition">➕ নতুন পণ্য যোগ</button>
-                <button onclick="logout()" class="w-full text-left p-4 text-red-400 hover:bg-red-500/10 rounded-2xl transition">🔒 লগআউট</button>
-            </div>
-        </nav>
-    </div>
-
-    <main class="max-w-md mx-auto p-4 pt-6">
+    <main class="max-w-md mx-auto p-4 space-y-6">
         
-        <div id="homeSec" class="space-y-6">
-            <div class="glass p-5 rounded-[2rem] shadow-inner">
-                <input type="text" id="searchInput" placeholder="পণ্যের নাম লিখুন..." class="w-full bg-slate-900 border border-slate-700 rounded-2xl py-4 px-6 outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-lg">
+        <div id="salesReport" class="hidden grid grid-cols-2 gap-4">
+            <div class="glass p-4 rounded-2xl text-center neon-border">
+                <p class="text-xs text-slate-400 uppercase">আজকের মোট বিক্রি</p>
+                <p class="text-2xl font-black text-emerald-400">৳ <span id="todayTotal">0</span></p>
+            </div>
+            <div class="glass p-4 rounded-2xl text-center neon-border">
+                <p class="text-xs text-slate-400 uppercase">আজকের মোট বাকি</p>
+                <p class="text-2xl font-black text-orange-500">৳ <span id="todayDue">0</span></p>
+            </div>
+        </div>
+
+        <div class="glass p-4 rounded-[2rem]">
+            <input type="text" id="searchInput" oninput="filterItems()" placeholder="পণ্যের নাম লিখুন..." class="w-full bg-slate-900 border border-slate-700 rounded-2xl py-3 px-5 outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+        </div>
+
+        <div id="productList" class="grid grid-cols-1 gap-3">
             </div>
 
-            <div id="calcCard" class="glass p-8 rounded-[2.5rem] hidden shadow-2xl border-emerald-500/20">
-                <h2 id="dispName" class="text-3xl font-bold mb-1">পণ্য</h2>
-                <p class="text-emerald-400 text-sm font-semibold mb-6">৳ <span id="dispPrice">0</span> / কেজি</p>
+        <div id="calcCard" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4">
+            <div class="glass w-full max-w-sm p-8 rounded-[2.5rem] relative">
+                <button onclick="closeCalc()" class="absolute top-4 right-6 text-3xl text-slate-400">×</button>
+                <h2 id="dispName" class="text-2xl font-bold mb-1">পণ্য</h2>
+                <p class="text-emerald-400 mb-6">৳ <span id="dispPrice">0</span> / কেজি</p>
                 
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label class="text-[10px] text-slate-500 uppercase ml-2">পরিমাণ</label>
-                        <input type="number" id="qty" class="w-full bg-slate-900 p-4 rounded-2xl text-2xl font-bold text-emerald-400 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="0">
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-500 uppercase ml-2">ইউনিট</label>
-                        <select id="unit" class="w-full bg-slate-900 p-4 rounded-2xl h-[62px] outline-none">
-                            <option value="gm">গ্রাম (gm)</option>
-                            <option value="kg">কেজি (kg)</option>
-                        </select>
-                    </div>
+                <input type="text" id="buyerName" placeholder="ক্রেতার নাম (ঐচ্ছিক)" class="w-full bg-slate-900 p-3 rounded-xl mb-4 border border-slate-700">
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <input type="number" id="qty" oninput="doCalc()" class="bg-slate-900 p-4 rounded-xl text-xl font-bold text-emerald-400" placeholder="পরিমাণ">
+                    <select id="unit" onchange="doCalc()" class="bg-slate-900 p-4 rounded-xl">
+                        <option value="kg">কেজি</option>
+                        <option value="gm">গ্রাম</option>
+                    </select>
                 </div>
 
-                <div class="bg-slate-900/80 p-6 rounded-3xl border border-slate-800 mb-6">
-                    <p class="text-slate-500 text-xs text-center mb-1 uppercase">মোট দাম</p>
-                    <p class="text-4xl font-black text-center text-white">৳ <span id="total">0.00</span></p>
+                <div class="flex gap-4 mb-4">
+                    <button id="paidBtn" onclick="setStatus('Paid')" class="flex-1 py-2 rounded-xl bg-emerald-600/20 border border-emerald-500 text-emerald-500 font-bold active-status">নগদ</button>
+                    <button id="dueBtn" onclick="setStatus('Due')" class="flex-1 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-400">বাকি</button>
                 </div>
-                <button onclick="copyMemo()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-emerald-900/20 active:scale-95 transition">মেমো কপি করুন</button>
+
+                <div class="bg-slate-900 p-4 rounded-2xl text-center mb-6">
+                    <p class="text-3xl font-black">৳ <span id="total">0.00</span></p>
+                </div>
+
+                <button onclick="saveAndSend()" class="w-full bg-emerald-600 py-4 rounded-2xl font-bold text-lg">হোয়াটসঅ্যাপ মেমো</button>
             </div>
         </div>
 
-        <div id="listSec" class="hidden space-y-4">
-            <h2 class="text-2xl font-bold text-center mb-6">আজকের বাজার দর</h2>
-            <div id="itemsContainer" class="space-y-3"></div>
-        </div>
-
-        <div id="addSec" class="hidden glass p-8 rounded-[2.5rem]">
-            <h2 class="text-xl font-bold mb-6 text-orange-400">নতুন পণ্য যোগ করুন</h2>
-            <div class="space-y-4">
-                <input type="text" id="newName" placeholder="পণ্যের নাম (বাংলায়)" class="w-full bg-slate-900 p-4 rounded-2xl outline-none">
-                <input type="number" id="newPrice" placeholder="প্রতি কেজি দর (৳)" class="w-full bg-slate-900 p-4 rounded-2xl outline-none">
-                <button onclick="addNewProduct()" class="w-full bg-orange-500 py-4 rounded-2xl font-bold shadow-lg">ডাটাবেসে সেভ করুন</button>
+        <div id="adminPanel" class="hidden glass p-6 rounded-3xl mt-10">
+            <h3 class="text-orange-400 font-bold mb-4">অ্যাডমিন: নতুন পণ্য যোগ করুন</h3>
+            <div class="space-y-3">
+                <input type="text" id="newName" placeholder="পণ্যের নাম" class="w-full bg-slate-900 p-3 rounded-xl">
+                <input type="number" id="newPrice" placeholder="মূল্য" class="w-full bg-slate-900 p-3 rounded-xl">
+                <button onclick="addNewProduct()" class="w-full bg-orange-500 py-3 rounded-xl font-bold">সেভ করুন</button>
             </div>
         </div>
+
     </main>
 
     <script>
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDV8z9HMAwoLRb5OVu2G1rQnRmS1f-QFwI",
             authDomain: "my-modern-store-f7cd8.firebaseapp.com",
@@ -114,16 +104,13 @@
         const adminEmail = "marufhos3n@gmail.com";
 
         let allProducts = [];
+        let currentStatus = "Paid";
 
-        // Auth Observer
         auth.onAuthStateChanged(user => {
-            if (user) {
-                document.getElementById('authArea').innerHTML = `<img src="${user.photoURL}" class="w-10 h-10 rounded-full border-2 border-emerald-500">`;
-                if(user.email === adminEmail) {
-                    document.getElementById('adminPanel').classList.remove('hidden');
-                }
-            } else {
-                document.getElementById('authArea').innerHTML = `<button onclick="login()" class="bg-emerald-600 px-5 py-2 rounded-2xl text-sm font-bold">লগইন</button>`;
+            if (user && user.email === adminEmail) {
+                document.getElementById('adminPanel').classList.remove('hidden');
+                document.getElementById('salesReport').classList.remove('hidden');
+                fetchTodaySales();
             }
             fetchProducts();
         });
@@ -133,39 +120,37 @@
             await auth.signInWithPopup(provider);
         }
 
-        function logout() { auth.signOut(); window.location.reload(); }
-
-        // Fetch Data from Firestore
         async function fetchProducts() {
-            const snapshot = await db.collection('products').get();
-            allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderPriceList();
+            const snap = await db.collection('products').get();
+            allProducts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderList(allProducts);
         }
 
-        async function addNewProduct() {
-            const name = document.getElementById('newName').value;
-            const price = parseFloat(document.getElementById('newPrice').value);
-            if(name && price) {
-                await db.collection('products').add({ name, price });
-                alert("সফলভাবে যোগ হয়েছে!");
-                document.getElementById('newName').value = '';
-                document.getElementById('newPrice').value = '';
-                fetchProducts();
-            }
+        function renderList(list) {
+            const container = document.getElementById('productList');
+            container.innerHTML = list.map(p => `
+                <div onclick="openCalc('${p.name}', ${p.price})" class="glass p-4 rounded-2xl flex justify-between items-center cursor-pointer hover:bg-emerald-500/5 transition">
+                    <span class="font-bold">${p.name}</span>
+                    <span class="text-emerald-400">৳ ${p.price}</span>
+                </div>
+            `).join('');
         }
 
-        // Calculation & Search
-        document.getElementById('searchInput').addEventListener('input', e => {
-            const found = allProducts.find(p => p.name.includes(e.target.value));
-            if(found && e.target.value !== "") {
-                document.getElementById('calcCard').classList.remove('hidden');
-                document.getElementById('dispName').innerText = found.name;
-                document.getElementById('dispPrice').innerText = found.price;
-                doCalc();
-            } else {
-                document.getElementById('calcCard').classList.add('hidden');
-            }
-        });
+        function filterItems() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
+            renderList(filtered);
+        }
+
+        function openCalc(name, price) {
+            document.getElementById('calcCard').classList.remove('hidden');
+            document.getElementById('dispName').innerText = name;
+            document.getElementById('dispPrice').innerText = price;
+            document.getElementById('qty').value = '';
+            document.getElementById('total').innerText = '0.00';
+        }
+
+        function closeCalc() { document.getElementById('calcCard').classList.add('hidden'); }
 
         function doCalc() {
             const p = parseFloat(document.getElementById('dispPrice').innerText);
@@ -175,33 +160,55 @@
             document.getElementById('total').innerText = res.toFixed(2);
         }
 
-        document.getElementById('qty').oninput = doCalc;
-        document.getElementById('unit').onchange = doCalc;
-
-        function renderPriceList() {
-            const container = document.getElementById('itemsContainer');
-            container.innerHTML = allProducts.map(p => `
-                <div class="glass p-5 rounded-2xl flex justify-between items-center">
-                    <span class="font-bold text-lg">${p.name}</span>
-                    <span class="text-emerald-400 font-black">৳ ${p.price}</span>
-                </div>
-            `).join('');
+        function setStatus(status) {
+            currentStatus = status;
+            document.getElementById('paidBtn').className = status === 'Paid' ? 'flex-1 py-2 rounded-xl bg-emerald-600/20 border border-emerald-500 text-emerald-500 font-bold' : 'flex-1 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-400';
+            document.getElementById('dueBtn').className = status === 'Due' ? 'flex-1 py-2 rounded-xl bg-orange-600/20 border border-orange-500 text-orange-500 font-bold' : 'flex-1 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-400';
         }
 
-        function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); }
+        async function saveAndSend() {
+            const name = document.getElementById('dispName').innerText;
+            const buyer = document.getElementById('buyerName').value || "কাস্টমার";
+            const qty = document.getElementById('qty').value;
+            const unit = document.getElementById('unit').value;
+            const total = document.getElementById('total').innerText;
+            const date = new Date().toLocaleDateString();
 
-        function showSection(sec) {
-            ['homeSec', 'listSec', 'addSec'].forEach(s => document.getElementById(s).classList.add('hidden'));
-            if(sec === 'home') document.getElementById('homeSec').classList.remove('hidden');
-            if(sec === 'list') document.getElementById('listSec').classList.remove('hidden');
-            if(sec === 'add') document.getElementById('addSec').classList.remove('hidden');
-            toggleMenu();
+            // Save to Firestore
+            await db.collection('sales').add({
+                item: name,
+                amount: parseFloat(total),
+                status: currentStatus,
+                date: new Date().toISOString().split('T')[0]
+            });
+
+            // WhatsApp Message Format
+            const msg = `*ভাই ভাই স্টোর*%0A--------------------------%0A*Buyer:* ${buyer}%0A*Product:* ${name}%0A*Quantity:* ${qty} ${unit}%0A*Total:* ৳ ${total}%0A*Status:* ${currentStatus === 'Paid' ? '✅ Paid' : '❌ Due'}%0A*Date:* ${date}%0A--------------------------%0Aধন্যবাদ আবার আসবেন!`;
+            
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
+            closeCalc();
+            fetchTodaySales();
         }
 
-        function copyMemo() {
-            const text = `--- স্মার্ট দোকান ---\nপণ্য: ${document.getElementById('dispName').innerText}\nপরিমাণ: ${document.getElementById('qty').value} ${document.getElementById('unit').value}\nমোট দাম: ৳ ${document.getElementById('total').innerText}`;
-            navigator.clipboard.writeText(text);
-            alert("মেমো কপি হয়েছে!");
+        async function fetchTodaySales() {
+            const today = new Date().toISOString().split('T')[0];
+            const snap = await db.collection('sales').where('date', '==', today).get();
+            let total = 0, due = 0;
+            snap.forEach(doc => {
+                if(doc.data().status === 'Paid') total += doc.data().amount;
+                else due += doc.data().amount;
+            });
+            document.getElementById('todayTotal').innerText = total.toFixed(0);
+            document.getElementById('todayDue').innerText = due.toFixed(0);
+        }
+
+        async function addNewProduct() {
+            const n = document.getElementById('newName').value;
+            const p = document.getElementById('newPrice').value;
+            if(n && p) {
+                await db.collection('products').add({ name: n, price: parseFloat(p) });
+                location.reload();
+            }
         }
     </script>
 </body>
