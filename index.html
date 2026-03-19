@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ভাই ভাই স্টোর - প্রো ড্যাশবোর্ড</title>
+    <title>ভাই ভাই স্টোর - সিকিউর ড্যাশবোর্ড</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&display=swap" rel="stylesheet">
     
@@ -14,26 +14,25 @@
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; background-color: #0F172A; color: #F8FAFC; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
-        .neon-shadow { box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
-        .fab { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .fab:active { scale: 0.9; }
         .status-btn.active { background: #10B981; color: white; border-color: #10B981; }
         .status-due.active { background: #F59E0B; color: white; border-color: #F59E0B; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .fab { transition: transform 0.2s; }
+        .fab:active { transform: scale(0.9); }
     </style>
 </head>
 <body class="pb-24">
 
     <nav class="p-4 glass sticky top-0 z-40 flex justify-between items-center shadow-xl">
-        <h1 class="font-bold text-xl text-emerald-500 tracking-wide">ভাই ভাই স্টোর</h1>
+        <h1 class="font-bold text-xl text-emerald-500">ভাই ভাই স্টোর</h1>
         <div id="authArea">
-            <button onclick="login()" id="loginBtn" class="bg-emerald-600 hover:bg-emerald-500 px-5 py-2 rounded-2xl text-sm font-bold transition-all">লগইন</button>
+            <button onclick="login()" id="loginBtn" class="bg-emerald-600 px-5 py-2 rounded-2xl text-sm font-bold transition-all">লগইন</button>
         </div>
     </nav>
 
     <main class="max-w-md mx-auto p-4 space-y-6">
         
-        <div id="salesReport" class="hidden grid grid-cols-2 gap-4 animate-pulse-once">
+        <div id="salesReport" class="hidden grid grid-cols-2 gap-4">
             <div class="glass p-4 rounded-3xl text-center border border-emerald-500/20">
                 <p class="text-[10px] text-slate-400 uppercase tracking-widest">আজকের ক্যাশ</p>
                 <p class="text-2xl font-black text-emerald-400">৳ <span id="todayTotal">0</span></p>
@@ -44,21 +43,19 @@
             </div>
         </div>
 
-        <div class="glass p-3 rounded-[2rem] neon-shadow">
+        <div class="glass p-3 rounded-[2rem]">
             <input type="text" id="searchInput" oninput="filterItems()" placeholder="পণ্যের নাম লিখে খুঁজুন..." class="w-full bg-transparent py-3 px-5 outline-none text-lg">
         </div>
 
-        <div id="productList" class="grid grid-cols-1 gap-3">
-            </div>
+        <div id="productList" class="grid grid-cols-1 gap-3"></div>
 
-        <div id="calcModal" class="fixed inset-0 bg-slate-950/90 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm">
+        <div id="calcModal" class="fixed inset-0 bg-slate-950/95 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-md">
             <div class="glass w-full max-w-sm p-8 rounded-[3rem] relative border border-white/10">
                 <button onclick="closeModal('calcModal')" class="absolute top-6 right-8 text-3xl text-slate-500">&times;</button>
-                
-                <h2 id="dispName" class="text-3xl font-bold mb-1 text-white">পণ্য</h2>
+                <h2 id="dispName" class="text-3xl font-bold mb-1">পণ্য</h2>
                 <p class="text-emerald-400 font-medium mb-6">দর: ৳ <span id="dispPrice">0</span> / কেজি</p>
                 
-                <input type="text" id="buyerName" placeholder="ক্রেতার নাম" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-2xl mb-4 outline-none focus:border-emerald-500">
+                <input type="text" id="buyerName" placeholder="ক্রেতার নাম" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-2xl mb-4 outline-none">
                 
                 <div class="grid grid-cols-2 gap-3 mb-6">
                     <input type="number" id="qty" oninput="calculateTotal()" class="bg-slate-900 p-4 rounded-2xl text-2xl font-bold text-emerald-400 outline-none" placeholder="0">
@@ -69,28 +66,27 @@
                 </div>
 
                 <div class="flex gap-3 mb-6">
-                    <button id="btnPaid" onclick="setStatus('Paid')" class="status-btn active flex-1 py-3 rounded-2xl border border-slate-700 font-bold transition-all">নগদ (Paid)</button>
-                    <button id="btnDue" onclick="setStatus('Due')" class="status-due flex-1 py-3 rounded-2xl border border-slate-700 font-bold transition-all text-slate-400">বাকি (Due)</button>
+                    <button id="btnPaid" onclick="setStatus('Paid')" class="status-btn active flex-1 py-3 rounded-2xl border border-slate-700 font-bold">Paid</button>
+                    <button id="btnDue" onclick="setStatus('Due')" class="status-due flex-1 py-3 rounded-2xl border border-slate-700 font-bold text-slate-400">Due</button>
                 </div>
 
-                <div class="bg-emerald-500/10 p-6 rounded-3xl text-center mb-8">
-                    <p class="text-slate-400 text-xs uppercase mb-1">মোট বিল</p>
-                    <p class="text-4xl font-black text-white">৳ <span id="totalDisplay">0.00</span></p>
+                <div class="bg-emerald-500/10 p-6 rounded-3xl text-center mb-6">
+                    <p class="text-4xl font-black">৳ <span id="totalDisplay">0.00</span></p>
                 </div>
 
-                <button onclick="processSale()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-5 rounded-[2rem] font-bold text-lg shadow-lg shadow-emerald-900/40">WhatsApp মেমো পাঠান</button>
+                <button onclick="processSale()" class="w-full bg-emerald-600 py-5 rounded-[2rem] font-bold text-lg">WhatsApp মেমো পাঠান</button>
             </div>
         </div>
 
-        <div id="addModal" class="fixed inset-0 bg-slate-950/90 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm">
+        <div id="addModal" class="fixed inset-0 bg-slate-950/95 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-md">
             <div class="glass w-full max-w-sm p-8 rounded-[3rem] border border-orange-500/20">
-                <h2 class="text-2xl font-bold mb-6 text-orange-400 text-center">নতুন পণ্য যোগ করুন</h2>
+                <h2 class="text-2xl font-bold mb-6 text-orange-400 text-center">নতুন পণ্য যোগ</h2>
                 <div class="space-y-4">
-                    <input type="text" id="newName" placeholder="পণ্যের নাম (বাংলায়)" class="w-full bg-slate-900 p-4 rounded-2xl outline-none">
-                    <input type="number" id="newPrice" placeholder="কেজি প্রতি মূল্য (৳)" class="w-full bg-slate-900 p-4 rounded-2xl outline-none">
+                    <input type="text" id="newName" placeholder="পণ্যের নাম" class="w-full bg-slate-900 p-4 rounded-2xl outline-none">
+                    <input type="number" id="newPrice" placeholder="মূল্য (৳)" class="w-full bg-slate-900 p-4 rounded-2xl outline-none">
                     <div class="flex gap-3 pt-2">
                         <button onclick="closeModal('addModal')" class="flex-1 bg-slate-800 py-4 rounded-2xl font-bold">বাতিল</button>
-                        <button onclick="saveNewProduct()" class="flex-1 bg-orange-600 py-4 rounded-2xl font-bold shadow-lg shadow-orange-900/30">সেভ করুন</button>
+                        <button onclick="saveNewProduct()" class="flex-1 bg-orange-600 py-4 rounded-2xl font-bold">সেভ</button>
                     </div>
                 </div>
             </div>
@@ -98,9 +94,7 @@
 
     </main>
 
-    <button id="fabBtn" onclick="openAddModal()" class="fixed bottom-8 right-8 w-16 h-16 bg-emerald-600 text-white rounded-full shadow-2xl items-center justify-center text-3xl fab z-50 hidden flex">
-        +
-    </button>
+    <button id="fabBtn" onclick="openAddModal()" class="fixed bottom-8 right-8 w-16 h-16 bg-emerald-600 text-white rounded-full shadow-2xl items-center justify-center text-3xl fab z-50 hidden flex">+</button>
 
     <script>
         const firebaseConfig = {
@@ -119,23 +113,22 @@
 
         let allProducts = [];
         let saleStatus = "Paid";
+        let isAdmin = false;
 
-        // Auth Listener
         auth.onAuthStateChanged(user => {
             const loginBtn = document.getElementById('loginBtn');
             const fab = document.getElementById('fabBtn');
             const report = document.getElementById('salesReport');
 
-            if (user) {
+            if (user && user.email === adminEmail) {
+                isAdmin = true;
                 loginBtn.innerText = "লগআউট";
                 loginBtn.onclick = () => auth.signOut().then(() => location.reload());
-                
-                if(user.email === adminEmail) {
-                    fab.classList.remove('hidden');
-                    report.classList.remove('hidden');
-                    fetchDailyStats();
-                }
+                fab.classList.remove('hidden');
+                report.classList.remove('hidden');
+                fetchDailyStats();
             } else {
+                isAdmin = false;
                 loginBtn.innerText = "লগইন";
                 loginBtn.onclick = login;
                 fab.classList.add('hidden');
@@ -158,7 +151,7 @@
         function renderItems(data) {
             const container = document.getElementById('productList');
             container.innerHTML = data.map(p => `
-                <div onclick="openSaleModal('${p.name}', ${p.price})" class="glass p-5 rounded-[1.5rem] flex justify-between items-center cursor-pointer hover:border-emerald-500/30 transition-all active:scale-[0.98]">
+                <div onclick="handleItemClick('${p.name}', ${p.price})" class="glass p-5 rounded-[1.5rem] flex justify-between items-center cursor-pointer active:scale-95 transition-all">
                     <div>
                         <p class="font-bold text-lg">${p.name}</p>
                         <p class="text-xs text-slate-500">৳ ${p.price} / কেজি</p>
@@ -166,6 +159,14 @@
                     <div class="text-emerald-500 bg-emerald-500/10 px-4 py-2 rounded-xl font-bold">🛒</div>
                 </div>
             `).join('');
+        }
+
+        function handleItemClick(name, price) {
+            if(!isAdmin) {
+                alert("দুঃখিত, শুধুমাত্র অ্যাডমিন ক্যালকুলেটর ব্যবহার করতে পারবেন। আপনি শুধু মূল্য দেখতে পারবেন।");
+                return;
+            }
+            openSaleModal(name, price);
         }
 
         function filterItems() {
@@ -179,7 +180,6 @@
             document.getElementById('dispName').innerText = name;
             document.getElementById('dispPrice').innerText = price;
             document.getElementById('qty').value = '';
-            document.getElementById('buyerName').value = '';
             document.getElementById('totalDisplay').innerText = '0.00';
             setStatus('Paid');
         }
@@ -200,27 +200,20 @@
 
         async function processSale() {
             const name = document.getElementById('dispName').innerText;
-            const buyer = document.getElementById('buyerName').value || "সম্মানিত ক্রেতা";
+            const buyer = document.getElementById('buyerName').value || "ক্রেতা";
             const qty = document.getElementById('qty').value;
             const unit = document.getElementById('unit').value;
             const total = document.getElementById('totalDisplay').innerText;
-            const date = new Date().toLocaleDateString('bn-BD');
 
-            if(!qty || qty <= 0) return alert("পরিমাণ লিখুন!");
+            if(!qty) return alert("পরিমাণ দিন!");
 
-            // Save Transaction
             await db.collection('sales').add({
-                item: name,
-                amount: parseFloat(total),
-                status: saleStatus,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                item: name, amount: parseFloat(total), status: saleStatus,
                 dateStr: new Date().toISOString().split('T')[0]
             });
 
-            const statusIcon = saleStatus === 'Paid' ? '✅ পরিশোধিত (Paid)' : '❌ বাকি (Due)';
-            const whatsappMsg = `*ভাই ভাই স্টোর*%0A--------------------------%0A*ক্রেতার নাম:* ${buyer}%0A*পণ্য:* ${name}%0A*পরিমাণ:* ${qty} ${unit}%0A*মোট বিল:* ৳ ${total}%0A*অবস্থা:* ${statusIcon}%0A*তারিখ:* ${date}%0A--------------------------%0Aধন্যবাদ, আবার আসবেন!`;
-            
-            window.open(`https://wa.me/?text=${whatsappMsg}`, '_blank');
+            const msg = `*ভাই ভাই স্টোর*%0A ক্রেতা: ${buyer}%0A পণ্য: ${name}%0A পরিমাণ: ${qty} ${unit}%0A মোট: ৳ ${total}%0A অবস্থা: ${saleStatus === 'Paid' ? 'Paid' : 'Due'}`;
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
             closeModal('calcModal');
             fetchDailyStats();
         }
@@ -230,9 +223,8 @@
             const snap = await db.collection('sales').where('dateStr', '==', today).get();
             let cash = 0, due = 0;
             snap.forEach(doc => {
-                const data = doc.data();
-                if(data.status === 'Paid') cash += data.amount;
-                else due += data.amount;
+                if(doc.data().status === 'Paid') cash += doc.data().amount;
+                else due += doc.data().amount;
             });
             document.getElementById('todayTotal').innerText = cash.toFixed(0);
             document.getElementById('todayDue').innerText = due.toFixed(0);
