@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ভাই ভাই স্টোর - স্মার্ট ড্যাশবোর্ড</title>
+    <title>ভাই ভাই স্টোর - প্রো ড্যাশবোর্ড</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&display=swap" rel="stylesheet">
     
@@ -14,78 +14,93 @@
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; background-color: #0F172A; color: #F8FAFC; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
-        .neon-border { border: 1px solid rgba(16, 185, 129, 0.3); box-shadow: 0 0 15px rgba(16, 185, 129, 0.1); }
+        .neon-shadow { box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
+        .fab { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .fab:active { scale: 0.9; }
+        .status-btn.active { background: #10B981; color: white; border-color: #10B981; }
+        .status-due.active { background: #F59E0B; color: white; border-color: #F59E0B; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
     </style>
 </head>
-<body class="pb-20">
+<body class="pb-24">
 
-    <nav class="p-4 glass sticky top-0 z-50 flex justify-between items-center shadow-2xl">
-        <h1 class="font-bold text-xl text-emerald-500">ভাই ভাই স্টোর</h1>
+    <nav class="p-4 glass sticky top-0 z-40 flex justify-between items-center shadow-xl">
+        <h1 class="font-bold text-xl text-emerald-500 tracking-wide">ভাই ভাই স্টোর</h1>
         <div id="authArea">
-            <button onclick="login()" id="loginBtn" class="bg-emerald-600 px-4 py-1.5 rounded-xl text-sm font-bold">লগইন</button>
+            <button onclick="login()" id="loginBtn" class="bg-emerald-600 hover:bg-emerald-500 px-5 py-2 rounded-2xl text-sm font-bold transition-all">লগইন</button>
         </div>
     </nav>
 
     <main class="max-w-md mx-auto p-4 space-y-6">
         
-        <div id="salesReport" class="hidden grid grid-cols-2 gap-4">
-            <div class="glass p-4 rounded-2xl text-center neon-border">
-                <p class="text-xs text-slate-400 uppercase">আজকের মোট বিক্রি</p>
+        <div id="salesReport" class="hidden grid grid-cols-2 gap-4 animate-pulse-once">
+            <div class="glass p-4 rounded-3xl text-center border border-emerald-500/20">
+                <p class="text-[10px] text-slate-400 uppercase tracking-widest">আজকের ক্যাশ</p>
                 <p class="text-2xl font-black text-emerald-400">৳ <span id="todayTotal">0</span></p>
             </div>
-            <div class="glass p-4 rounded-2xl text-center neon-border">
-                <p class="text-xs text-slate-400 uppercase">আজকের মোট বাকি</p>
+            <div class="glass p-4 rounded-3xl text-center border border-orange-500/20">
+                <p class="text-[10px] text-slate-400 uppercase tracking-widest">আজকের বাকি</p>
                 <p class="text-2xl font-black text-orange-500">৳ <span id="todayDue">0</span></p>
             </div>
         </div>
 
-        <div class="glass p-4 rounded-[2rem]">
-            <input type="text" id="searchInput" oninput="filterItems()" placeholder="পণ্যের নাম লিখুন..." class="w-full bg-slate-900 border border-slate-700 rounded-2xl py-3 px-5 outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+        <div class="glass p-3 rounded-[2rem] neon-shadow">
+            <input type="text" id="searchInput" oninput="filterItems()" placeholder="পণ্যের নাম লিখে খুঁজুন..." class="w-full bg-transparent py-3 px-5 outline-none text-lg">
         </div>
 
         <div id="productList" class="grid grid-cols-1 gap-3">
             </div>
 
-        <div id="calcCard" class="fixed inset-0 bg-black/80 z-[100] hidden flex items-center justify-center p-4">
-            <div class="glass w-full max-w-sm p-8 rounded-[2.5rem] relative">
-                <button onclick="closeCalc()" class="absolute top-4 right-6 text-3xl text-slate-400">×</button>
-                <h2 id="dispName" class="text-2xl font-bold mb-1">পণ্য</h2>
-                <p class="text-emerald-400 mb-6">৳ <span id="dispPrice">0</span> / কেজি</p>
+        <div id="calcModal" class="fixed inset-0 bg-slate-950/90 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm">
+            <div class="glass w-full max-w-sm p-8 rounded-[3rem] relative border border-white/10">
+                <button onclick="closeModal('calcModal')" class="absolute top-6 right-8 text-3xl text-slate-500">&times;</button>
                 
-                <input type="text" id="buyerName" placeholder="ক্রেতার নাম (ঐচ্ছিক)" class="w-full bg-slate-900 p-3 rounded-xl mb-4 border border-slate-700">
+                <h2 id="dispName" class="text-3xl font-bold mb-1 text-white">পণ্য</h2>
+                <p class="text-emerald-400 font-medium mb-6">দর: ৳ <span id="dispPrice">0</span> / কেজি</p>
                 
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <input type="number" id="qty" oninput="doCalc()" class="bg-slate-900 p-4 rounded-xl text-xl font-bold text-emerald-400" placeholder="পরিমাণ">
-                    <select id="unit" onchange="doCalc()" class="bg-slate-900 p-4 rounded-xl">
+                <input type="text" id="buyerName" placeholder="ক্রেতার নাম" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-2xl mb-4 outline-none focus:border-emerald-500">
+                
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <input type="number" id="qty" oninput="calculateTotal()" class="bg-slate-900 p-4 rounded-2xl text-2xl font-bold text-emerald-400 outline-none" placeholder="0">
+                    <select id="unit" onchange="calculateTotal()" class="bg-slate-900 p-4 rounded-2xl font-bold outline-none">
                         <option value="kg">কেজি</option>
                         <option value="gm">গ্রাম</option>
                     </select>
                 </div>
 
-                <div class="flex gap-4 mb-4">
-                    <button id="paidBtn" onclick="setStatus('Paid')" class="flex-1 py-2 rounded-xl bg-emerald-600/20 border border-emerald-500 text-emerald-500 font-bold active-status">নগদ</button>
-                    <button id="dueBtn" onclick="setStatus('Due')" class="flex-1 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-400">বাকি</button>
+                <div class="flex gap-3 mb-6">
+                    <button id="btnPaid" onclick="setStatus('Paid')" class="status-btn active flex-1 py-3 rounded-2xl border border-slate-700 font-bold transition-all">নগদ (Paid)</button>
+                    <button id="btnDue" onclick="setStatus('Due')" class="status-due flex-1 py-3 rounded-2xl border border-slate-700 font-bold transition-all text-slate-400">বাকি (Due)</button>
                 </div>
 
-                <div class="bg-slate-900 p-4 rounded-2xl text-center mb-6">
-                    <p class="text-3xl font-black">৳ <span id="total">0.00</span></p>
+                <div class="bg-emerald-500/10 p-6 rounded-3xl text-center mb-8">
+                    <p class="text-slate-400 text-xs uppercase mb-1">মোট বিল</p>
+                    <p class="text-4xl font-black text-white">৳ <span id="totalDisplay">0.00</span></p>
                 </div>
 
-                <button onclick="saveAndSend()" class="w-full bg-emerald-600 py-4 rounded-2xl font-bold text-lg">হোয়াটসঅ্যাপ মেমো</button>
+                <button onclick="processSale()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-5 rounded-[2rem] font-bold text-lg shadow-lg shadow-emerald-900/40">WhatsApp মেমো পাঠান</button>
             </div>
         </div>
 
-        <div id="adminPanel" class="hidden glass p-6 rounded-3xl mt-10">
-            <h3 class="text-orange-400 font-bold mb-4">অ্যাডমিন: নতুন পণ্য যোগ করুন</h3>
-            <div class="space-y-3">
-                <input type="text" id="newName" placeholder="পণ্যের নাম" class="w-full bg-slate-900 p-3 rounded-xl">
-                <input type="number" id="newPrice" placeholder="মূল্য" class="w-full bg-slate-900 p-3 rounded-xl">
-                <button onclick="addNewProduct()" class="w-full bg-orange-500 py-3 rounded-xl font-bold">সেভ করুন</button>
+        <div id="addModal" class="fixed inset-0 bg-slate-950/90 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-sm">
+            <div class="glass w-full max-w-sm p-8 rounded-[3rem] border border-orange-500/20">
+                <h2 class="text-2xl font-bold mb-6 text-orange-400 text-center">নতুন পণ্য যোগ করুন</h2>
+                <div class="space-y-4">
+                    <input type="text" id="newName" placeholder="পণ্যের নাম (বাংলায়)" class="w-full bg-slate-900 p-4 rounded-2xl outline-none">
+                    <input type="number" id="newPrice" placeholder="কেজি প্রতি মূল্য (৳)" class="w-full bg-slate-900 p-4 rounded-2xl outline-none">
+                    <div class="flex gap-3 pt-2">
+                        <button onclick="closeModal('addModal')" class="flex-1 bg-slate-800 py-4 rounded-2xl font-bold">বাতিল</button>
+                        <button onclick="saveNewProduct()" class="flex-1 bg-orange-600 py-4 rounded-2xl font-bold shadow-lg shadow-orange-900/30">সেভ করুন</button>
+                    </div>
+                </div>
             </div>
         </div>
 
     </main>
+
+    <button id="fabBtn" onclick="openAddModal()" class="fixed bottom-8 right-8 w-16 h-16 bg-emerald-600 text-white rounded-full shadow-2xl items-center justify-center text-3xl fab z-50 hidden flex">
+        +
+    </button>
 
     <script>
         const firebaseConfig = {
@@ -94,8 +109,7 @@
             projectId: "my-modern-store-f7cd8",
             storageBucket: "my-modern-store-f7cd8.firebasestorage.app",
             messagingSenderId: "959347442093",
-            appId: "1:959347442093:web:fb89c34bc8db0c9d5e2124",
-            measurementId: "G-WYSVGQBBYG"
+            appId: "1:959347442093:web:fb89c34bc8db0c9d5e2124"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -104,13 +118,28 @@
         const adminEmail = "marufhos3n@gmail.com";
 
         let allProducts = [];
-        let currentStatus = "Paid";
+        let saleStatus = "Paid";
 
+        // Auth Listener
         auth.onAuthStateChanged(user => {
-            if (user && user.email === adminEmail) {
-                document.getElementById('adminPanel').classList.remove('hidden');
-                document.getElementById('salesReport').classList.remove('hidden');
-                fetchTodaySales();
+            const loginBtn = document.getElementById('loginBtn');
+            const fab = document.getElementById('fabBtn');
+            const report = document.getElementById('salesReport');
+
+            if (user) {
+                loginBtn.innerText = "লগআউট";
+                loginBtn.onclick = () => auth.signOut().then(() => location.reload());
+                
+                if(user.email === adminEmail) {
+                    fab.classList.remove('hidden');
+                    report.classList.remove('hidden');
+                    fetchDailyStats();
+                }
+            } else {
+                loginBtn.innerText = "লগইন";
+                loginBtn.onclick = login;
+                fab.classList.add('hidden');
+                report.classList.add('hidden');
             }
             fetchProducts();
         });
@@ -121,17 +150,20 @@
         }
 
         async function fetchProducts() {
-            const snap = await db.collection('products').get();
+            const snap = await db.collection('products').orderBy('name').get();
             allProducts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderList(allProducts);
+            renderItems(allProducts);
         }
 
-        function renderList(list) {
+        function renderItems(data) {
             const container = document.getElementById('productList');
-            container.innerHTML = list.map(p => `
-                <div onclick="openCalc('${p.name}', ${p.price})" class="glass p-4 rounded-2xl flex justify-between items-center cursor-pointer hover:bg-emerald-500/5 transition">
-                    <span class="font-bold">${p.name}</span>
-                    <span class="text-emerald-400">৳ ${p.price}</span>
+            container.innerHTML = data.map(p => `
+                <div onclick="openSaleModal('${p.name}', ${p.price})" class="glass p-5 rounded-[1.5rem] flex justify-between items-center cursor-pointer hover:border-emerald-500/30 transition-all active:scale-[0.98]">
+                    <div>
+                        <p class="font-bold text-lg">${p.name}</p>
+                        <p class="text-xs text-slate-500">৳ ${p.price} / কেজি</p>
+                    </div>
+                    <div class="text-emerald-500 bg-emerald-500/10 px-4 py-2 rounded-xl font-bold">🛒</div>
                 </div>
             `).join('');
         }
@@ -139,78 +171,85 @@
         function filterItems() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
-            renderList(filtered);
+            renderItems(filtered);
         }
 
-        function openCalc(name, price) {
-            document.getElementById('calcCard').classList.remove('hidden');
+        function openSaleModal(name, price) {
+            document.getElementById('calcModal').classList.remove('hidden');
             document.getElementById('dispName').innerText = name;
             document.getElementById('dispPrice').innerText = price;
             document.getElementById('qty').value = '';
-            document.getElementById('total').innerText = '0.00';
+            document.getElementById('buyerName').value = '';
+            document.getElementById('totalDisplay').innerText = '0.00';
+            setStatus('Paid');
         }
 
-        function closeCalc() { document.getElementById('calcCard').classList.add('hidden'); }
+        function setStatus(status) {
+            saleStatus = status;
+            document.getElementById('btnPaid').classList.toggle('active', status === 'Paid');
+            document.getElementById('btnDue').classList.toggle('active', status === 'Due');
+        }
 
-        function doCalc() {
+        function calculateTotal() {
             const p = parseFloat(document.getElementById('dispPrice').innerText);
             const q = parseFloat(document.getElementById('qty').value) || 0;
             const u = document.getElementById('unit').value;
             const res = (u === 'gm') ? (p/1000)*q : p*q;
-            document.getElementById('total').innerText = res.toFixed(2);
+            document.getElementById('totalDisplay').innerText = res.toFixed(2);
         }
 
-        function setStatus(status) {
-            currentStatus = status;
-            document.getElementById('paidBtn').className = status === 'Paid' ? 'flex-1 py-2 rounded-xl bg-emerald-600/20 border border-emerald-500 text-emerald-500 font-bold' : 'flex-1 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-400';
-            document.getElementById('dueBtn').className = status === 'Due' ? 'flex-1 py-2 rounded-xl bg-orange-600/20 border border-orange-500 text-orange-500 font-bold' : 'flex-1 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-400';
-        }
-
-        async function saveAndSend() {
+        async function processSale() {
             const name = document.getElementById('dispName').innerText;
-            const buyer = document.getElementById('buyerName').value || "কাস্টমার";
+            const buyer = document.getElementById('buyerName').value || "সম্মানিত ক্রেতা";
             const qty = document.getElementById('qty').value;
             const unit = document.getElementById('unit').value;
-            const total = document.getElementById('total').innerText;
-            const date = new Date().toLocaleDateString();
+            const total = document.getElementById('totalDisplay').innerText;
+            const date = new Date().toLocaleDateString('bn-BD');
 
-            // Save to Firestore
+            if(!qty || qty <= 0) return alert("পরিমাণ লিখুন!");
+
+            // Save Transaction
             await db.collection('sales').add({
                 item: name,
                 amount: parseFloat(total),
-                status: currentStatus,
-                date: new Date().toISOString().split('T')[0]
+                status: saleStatus,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                dateStr: new Date().toISOString().split('T')[0]
             });
 
-            // WhatsApp Message Format
-            const msg = `*ভাই ভাই স্টোর*%0A--------------------------%0A*Buyer:* ${buyer}%0A*Product:* ${name}%0A*Quantity:* ${qty} ${unit}%0A*Total:* ৳ ${total}%0A*Status:* ${currentStatus === 'Paid' ? '✅ Paid' : '❌ Due'}%0A*Date:* ${date}%0A--------------------------%0Aধন্যবাদ আবার আসবেন!`;
+            const statusIcon = saleStatus === 'Paid' ? '✅ পরিশোধিত (Paid)' : '❌ বাকি (Due)';
+            const whatsappMsg = `*ভাই ভাই স্টোর*%0A--------------------------%0A*ক্রেতার নাম:* ${buyer}%0A*পণ্য:* ${name}%0A*পরিমাণ:* ${qty} ${unit}%0A*মোট বিল:* ৳ ${total}%0A*অবস্থা:* ${statusIcon}%0A*তারিখ:* ${date}%0A--------------------------%0Aধন্যবাদ, আবার আসবেন!`;
             
-            window.open(`https://wa.me/?text=${msg}`, '_blank');
-            closeCalc();
-            fetchTodaySales();
+            window.open(`https://wa.me/?text=${whatsappMsg}`, '_blank');
+            closeModal('calcModal');
+            fetchDailyStats();
         }
 
-        async function fetchTodaySales() {
+        async function fetchDailyStats() {
             const today = new Date().toISOString().split('T')[0];
-            const snap = await db.collection('sales').where('date', '==', today).get();
-            let total = 0, due = 0;
+            const snap = await db.collection('sales').where('dateStr', '==', today).get();
+            let cash = 0, due = 0;
             snap.forEach(doc => {
-                if(doc.data().status === 'Paid') total += doc.data().amount;
-                else due += doc.data().amount;
+                const data = doc.data();
+                if(data.status === 'Paid') cash += data.amount;
+                else due += data.amount;
             });
-            document.getElementById('todayTotal').innerText = total.toFixed(0);
+            document.getElementById('todayTotal').innerText = cash.toFixed(0);
             document.getElementById('todayDue').innerText = due.toFixed(0);
         }
 
-        async function addNewProduct() {
-            const n = document.getElementById('newName').value;
-            const p = document.getElementById('newPrice').value;
-            if(n && p) {
-                await db.collection('products').add({ name: n, price: parseFloat(p) });
-                location.reload();
+        function openAddModal() { document.getElementById('addModal').classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        async function saveNewProduct() {
+            const name = document.getElementById('newName').value;
+            const price = parseFloat(document.getElementById('newPrice').value);
+            if(name && price) {
+                await db.collection('products').add({ name, price });
+                closeModal('addModal');
+                fetchProducts();
             }
         }
     </script>
 </body>
-    </html>
-    
+</html>
