@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ভাই ভাই স্টোর - প্রো মেমো সিস্টেম</title>
+    <title>ভাই ভাই স্টোর - স্মার্ট মেমো</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&display=swap" rel="stylesheet">
     
@@ -14,55 +14,53 @@
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; background-color: #0F172A; color: #F8FAFC; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
-        .cart-item { animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .neon-text { text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+        .cart-item { animation: slideIn 0.2s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
-<body class="pb-32">
+<body class="pb-40">
 
     <nav class="p-4 glass sticky top-0 z-40 flex justify-between items-center">
-        <h1 class="font-bold text-xl text-emerald-500 neon-text">ভাই ভাই স্টোর</h1>
-        <button onclick="login()" id="loginBtn" class="bg-emerald-600 px-5 py-2 rounded-2xl text-sm font-bold">লগইন</button>
+        <h1 class="font-bold text-xl text-emerald-500">ভাই ভাই স্টোর</h1>
+        <button onclick="login()" id="loginBtn" class="bg-emerald-600 px-4 py-1.5 rounded-xl text-sm font-bold">লগইন</button>
     </nav>
 
     <main class="max-w-md mx-auto p-4 space-y-6">
-        
-        <div class="glass p-3 rounded-[2rem] sticky top-20 z-30">
+        <div class="glass p-3 rounded-3xl">
             <input type="text" id="searchInput" oninput="filterItems()" placeholder="পণ্য খুঁজুন..." class="w-full bg-transparent py-2 px-4 outline-none text-lg">
         </div>
-
         <div id="productList" class="grid grid-cols-1 gap-3"></div>
-
     </main>
 
     <div id="cartSection" class="fixed bottom-0 left-0 right-0 glass rounded-t-[2.5rem] p-6 z-50 shadow-2xl hidden border-t border-emerald-500/30">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-lg text-emerald-400">মেমো লিস্ট</h3>
-            <button onclick="clearCart()" class="text-xs text-red-400 border border-red-400/30 px-3 py-1 rounded-full italic">সব মুছুন</button>
+            <h3 class="font-bold text-emerald-400">মেমো লিস্ট</h3>
+            <button onclick="clearCart()" class="text-xs text-red-400">মুছুন</button>
         </div>
         
-        <div id="cartItems" class="max-h-40 overflow-y-auto space-y-2 mb-4 pr-2">
+        <div id="cartItems" class="max-h-32 overflow-y-auto space-y-2 mb-4"></div>
+
+        <div class="bg-slate-900/50 p-4 rounded-2xl mb-4">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-2xl font-black text-white">৳ <span id="cartSubtotal">0</span></span>
+                <div class="flex gap-2">
+                    <button id="pBtn" onclick="setStatus('Paid')" class="px-4 py-2 rounded-xl border border-emerald-500 bg-emerald-500 text-white font-bold text-xs">Paid</button>
+                    <button id="dBtn" onclick="setStatus('Due')" class="px-4 py-2 rounded-xl border border-slate-700 text-slate-400 font-bold text-xs">Due</button>
+                </div>
             </div>
 
-        <div class="flex justify-between items-center mb-6 bg-slate-900/50 p-4 rounded-2xl">
-            <div>
-                <p class="text-xs text-slate-400 uppercase">মোট টাকা</p>
-                <p class="text-3xl font-black text-white">৳ <span id="cartSubtotal">0</span></p>
-            </div>
-            <div class="flex gap-2">
-                <button id="pBtn" onclick="setGlobalStatus('Paid')" class="px-4 py-2 rounded-xl border border-emerald-500 bg-emerald-500 text-white font-bold text-xs">Paid</button>
-                <button id="dBtn" onclick="setGlobalStatus('Due')" class="px-4 py-2 rounded-xl border border-slate-700 text-slate-400 font-bold text-xs">Due</button>
+            <div id="dueInputs" class="hidden space-y-2 pt-2 border-t border-white/5">
+                <input type="number" id="cashPaid" oninput="calcRemainingDue()" placeholder="জমা (কত টাকা দিল?)" class="w-full bg-slate-800 p-2 rounded-lg text-sm outline-none border border-slate-700">
+                <p class="text-xs text-orange-400">বাকি থাকবে: ৳ <span id="remainingDue">0</span></p>
             </div>
         </div>
 
-        <button onclick="copyAndProcessMemo()" class="w-full bg-emerald-600 py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all">মেমো কপি করুন</button>
+        <button onclick="copyMemo()" class="w-full bg-emerald-600 py-4 rounded-2xl font-bold text-lg active:scale-95 transition-all">মেমো কপি করুন</button>
     </div>
 
-    <div id="qtyModal" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-md">
-        <div class="glass w-full max-w-sm p-8 rounded-[3rem] border border-white/10 text-center">
-            <h2 id="qName" class="text-2xl font-bold mb-1">পণ্য</h2>
-            <p id="qPrice" class="text-emerald-400 mb-6">৳ 0 / কেজি</p>
+    <div id="qtyModal" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-6">
+        <div class="glass w-full max-w-sm p-8 rounded-[3rem] text-center">
+            <h2 id="qName" class="text-2xl font-bold mb-6">পণ্য</h2>
             <div class="flex gap-2 mb-6">
                 <input type="number" id="qVal" placeholder="পরিমাণ" class="flex-1 bg-slate-900 p-4 rounded-2xl text-2xl font-bold text-emerald-400 outline-none">
                 <select id="qUnit" class="bg-slate-900 p-4 rounded-2xl font-bold outline-none">
@@ -113,7 +111,7 @@
 
         function renderItems(data) {
             document.getElementById('productList').innerHTML = data.map(p => `
-                <div onclick="handleItemClick('${p.name}', ${p.price})" class="glass p-5 rounded-[1.5rem] flex justify-between items-center cursor-pointer active:scale-95 transition-all">
+                <div onclick="handleItemClick('${p.name}', ${p.price})" class="glass p-5 rounded-2xl flex justify-between items-center cursor-pointer active:scale-95 transition-all">
                     <span class="font-bold text-lg">${p.name}</span>
                     <span class="text-emerald-400 font-bold">৳ ${p.price}</span>
                 </div>
@@ -130,7 +128,6 @@
             activeItem = { n, p };
             document.getElementById('qtyModal').classList.remove('hidden');
             document.getElementById('qName').innerText = n;
-            document.getElementById('qPrice').innerText = `৳ ${p} / কেজি`;
             document.getElementById('qVal').value = '';
         }
 
@@ -151,41 +148,56 @@
             let subtotal = 0;
             container.innerHTML = cart.map((item, index) => {
                 subtotal += item.total;
-                return `<div class="cart-item flex justify-between text-sm bg-slate-800/50 p-2 rounded-xl border border-white/5">
+                return `<div class="cart-item flex justify-between text-sm bg-slate-800/50 p-2 rounded-xl">
                     <span>${item.name} (${item.qty}${item.unit})</span>
-                    <span class="font-bold">৳ ${item.total.toFixed(0)}</span>
+                    <span class="font-bold">${item.total.toFixed(0)}৳</span>
                 </div>`;
             }).join('');
             document.getElementById('cartSubtotal').innerText = subtotal.toFixed(0);
+            calcRemainingDue();
         }
 
-        function setGlobalStatus(s) {
+        function setStatus(s) {
             currentStatus = s;
             document.getElementById('pBtn').className = s === 'Paid' ? 'px-4 py-2 rounded-xl border border-emerald-500 bg-emerald-500 text-white font-bold text-xs' : 'px-4 py-2 rounded-xl border border-slate-700 text-slate-400 font-bold text-xs';
             document.getElementById('dBtn').className = s === 'Due' ? 'px-4 py-2 rounded-xl border border-orange-500 bg-orange-500 text-white font-bold text-xs' : 'px-4 py-2 rounded-xl border border-slate-700 text-slate-400 font-bold text-xs';
+            document.getElementById('dueInputs').classList.toggle('hidden', s === 'Paid');
+        }
+
+        function calcRemainingDue() {
+            const subtotal = parseFloat(document.getElementById('cartSubtotal').innerText);
+            const paid = parseFloat(document.getElementById('cashPaid').value) || 0;
+            document.getElementById('remainingDue').innerText = (subtotal - paid).toFixed(0);
         }
 
         function clearCart() { cart = []; updateCartUI(); }
 
-        function copyAndProcessMemo() {
+        function copyMemo() {
             if(cart.length === 0) return alert("কার্ট খালি!");
             
+            const subtotal = parseFloat(document.getElementById('cartSubtotal').innerText);
             let listText = "";
-            let grandTotal = 0;
             cart.forEach(i => {
                 listText += `• ${i.name}: ${i.qty}${i.unit} = ${i.total.toFixed(0)}৳\n`;
-                grandTotal += i.total;
             });
 
-            const memo = `ভাই ভাই স্টোর\n--------------------------\n${listText}--------------------------\nমোট বিল: ${grandTotal.toFixed(0)}৳\nঅবস্থা: ${currentStatus === 'Paid' ? '✅ Paid' : '❌ Due'}\nতারিখ: ${new Date().toLocaleDateString('bn-BD')}\n--------------------------\nধন্যবাদ আবার আসবেন!`;
+            let statusText = `অবস্থা: ✅ Paid`;
+            if(currentStatus === 'Due') {
+                const paid = parseFloat(document.getElementById('cashPaid').value) || 0;
+                const due = subtotal - paid;
+                statusText = `অবস্থা: জমা:- ${paid}৳, বাকি:- ${due}৳`;
+            }
+
+            const memo = `ভাই ভাই স্টোর\n${listText}মোট বিল: ${subtotal.toFixed(0)}৳\n${statusText}\nতারিখ: ${new Date().toLocaleDateString('bn-BD')}\nধন্যবাদ আবার আসবেন!`;
 
             navigator.clipboard.writeText(memo).then(() => {
-                alert("মেমো কপি হয়েছে! এখন যেকোনো জায়গায় পেস্ট করুন।");
-                // Save to Firebase (Optional sales tracking)
-                db.collection('sales').add({ items: cart, total: grandTotal, status: currentStatus, date: new Date().toISOString().split('T')[0] });
+                alert("মেমো কপি হয়েছে!");
+                db.collection('sales').add({ items: cart, total: subtotal, status: currentStatus, date: new Date().toISOString().split('T')[0] });
                 clearCart();
+                document.getElementById('cashPaid').value = '';
             });
         }
     </script>
 </body>
 </html>
+html>
